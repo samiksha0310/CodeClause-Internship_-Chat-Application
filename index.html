@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .login-box p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #2c2f33;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #23272a;
+        }
+
+        .sidebar-header h2 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #23272a;
+            border-radius: 8px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 500;
+        }
+
+        .rooms-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .rooms-title {
+            color: #8e9297;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .room-item {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            color: #8e9297;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .room-item:hover {
+            background: #34373c;
+            color: #dcddde;
+        }
+
+        .room-item.active {
+            background: #5568d3;
+            color: white;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid #23272a;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 10px;
+            background: #ed4245;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #c03537;
+        }
+
+        /* Main Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #36393f;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: #2c2f33;
+            border-bottom: 1px solid #23272a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 {
+            color: white;
+            font-size: 24px;
+        }
+
+        .chat-header p {
+            color: #8e9297;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .members-info {
+            color: #8e9297;
+            font-size: 14px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+        }
+
+        .message-system {
+            text-align: center;
+            color: #8e9297;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .message-content {
+            display: flex;
+            gap: 15px;
+            max-width: 70%;
+        }
+
+        .message-content.own {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .message-bubble {
+            background: #40444b;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #dcddde;
+        }
+
+        .message-content.own .message-bubble {
+            background: #5568d3;
+        }
+
+        .message-author {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .message-content.own .message-author {
+            color: #b9bdfb;
+        }
+
+        .message-text {
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            color: #72767d;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        /* Message Input */
+        .message-input {
+            padding: 20px;
+            background: #2c2f33;
+            border-top: 1px solid #23272a;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #40444b;
+            border: none;
+            border-radius: 8px;
+            color: #dcddde;
+            font-size: 15px;
+        }
+
+        .message-input input:focus {
+            outline: 2px solid #667eea;
+        }
+
+        .message-input input::placeholder {
+            color: #72767d;
+        }
+
+        .btn-send {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-send:hover {
+            background: #5568d3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2c2f33;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #40444b;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f545c;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h1>💬 Chat App</h1>
+            <p>Join the conversation</p>
+            <div class="input-group">
+                <label for="username">Choose a username</label>
+                <input type="text" id="username" placeholder="Enter your username" required>
+            </div>
+            <button class="btn-primary" onclick="login()">Join Chat</button>
+        </div>
+    </div>
+
+    <!-- Main Chat Interface -->
+    <div id="chatScreen" class="container hidden">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Chat Rooms</h2>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <div class="user-name" id="userName"></div>
+                </div>
+            </div>
+
+            <div class="rooms-list">
+                <div class="rooms-title">Rooms</div>
+                <div class="room-item active" onclick="switchRoom('general')">
+                    <span># general</span>
+                </div>
+                <div class="room-item" onclick="switchRoom('random')">
+                    <span># random</span>
+                </div>
+                <div class="room-item" onclick="switchRoom('tech')">
+                    <span># tech</span>
+                </div>
+                <div class="room-item" onclick="switchRoom('gaming')">
+                    <span># gaming</span>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div>
+                    <h2 id="roomName"># general</h2>
+                    <p id="memberCount">1 member online</p>
+                </div>
+                <div class="members-info" id="membersList"></div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be added here -->
+            </div>
+
+            <div class="message-input">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type a message..."
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <button class="btn-send" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentUser = '';
+        let currentRoom = 'general';
+        let messages = {
+            general: [],
+            random: [],
+            tech: [],
+            gaming: []
+        };
+        let roomUsers = {
+            general: [],
+            random: [],
+            tech: [],
+            gaming: []
+        };
+
+        // Login
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            if (username) {
+                currentUser = username;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('chatScreen').classList.remove('hidden');
+                document.getElementById('userName').textContent = username;
+                document.getElementById('userAvatar').textContent = username[0].toUpperCase();
+                
+                // Initialize all rooms with welcome message
+                Object.keys(messages).forEach(room => {
+                    messages[room].push({
+                        type: 'system',
+                        text: `Welcome to #${room}!`,
+                        timestamp: getCurrentTime()
+                    });
+                    roomUsers[room] = [username];
+                });
+                
+                renderMessages();
+                updateMembersList();
+            }
+        }
+
+        // Logout
+        function logout() {
+            currentUser = '';
+            currentRoom = 'general';
+            messages = {
+                general: [],
+                random: [],
+                tech: [],
+                gaming: []
+            };
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('chatScreen').classList.add('hidden');
+            document.getElementById('username').value = '';
+        }
+
+        // Switch Room
+        function switchRoom(room) {
+            if (room === currentRoom) return;
+            
+            currentRoom = room;
+            document.getElementById('roomName').textContent = '# ' + room;
+            
+            // Update active room styling
+            document.querySelectorAll('.room-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.room-item').classList.add('active');
+            
+            // Add join message
+            messages[room].push({
+                type: 'system',
+                text: `${currentUser} joined the room`,
+                timestamp: getCurrentTime()
+            });
+            
+            renderMessages();
+            updateMembersList();
+        }
+
+        // Send Message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                messages[currentRoom].push({
+                    type: 'user',
+                    username: currentUser,
+                    text: text,
+                    timestamp: getCurrentTime()
+                });
+                
+                input.value = '';
+                renderMessages();
+            }
+        }
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Render Messages
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+            
+            messages[currentRoom].forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                
+                if (msg.type === 'system') {
+                    messageDiv.innerHTML = `
+                        <div class="message-system">${msg.text}</div>
+                    `;
+                } else {
+                    const isOwn = msg.username === currentUser;
+                    messageDiv.innerHTML = `
+                        <div class="message-content ${isOwn ? 'own' : ''}">
+                            <div class="message-avatar">${msg.username[0].toUpperCase()}</div>
+                            <div class="message-bubble">
+                                ${!isOwn ? `<div class="message-author">${msg.username}</div>` : ''}
+                                <div class="message-text">${msg.text}</div>
+                                <div class="message-time">${msg.timestamp}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                container.appendChild(messageDiv);
+            });
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Update Members List
+        function updateMembersList() {
+            const members = roomUsers[currentRoom];
+            document.getElementById('memberCount').textContent = `${members.length} member${members.length !== 1 ? 's' : ''} online`;
+            document.getElementById('membersList').textContent = members.join(', ');
+        }
+
+        // Get Current Time
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+        }
+
+        // Simulate receiving messages from others
+        function simulateIncomingMessage() {
+            const otherUsers = ['Alice', 'Bob', 'Charlie', 'Diana'];
+            const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+            const sampleMessages = [
+                'Hey everyone!',
+                'How is everyone doing?',
+                'Anyone here?',
+                'Great to be here!',
+                'What are you all working on?'
+            ];
+            
+            // Add other user to room if not present
+            if (!roomUsers[currentRoom].includes(randomUser)) {
+                roomUsers[currentRoom].push(randomUser);
+                messages[currentRoom].push({
+                    type: 'system',
+                    text: `${randomUser} joined the room`,
+                    timestamp: getCurrentTime()
+                });
+            }
+            
+            messages[currentRoom].push({
+                type: 'user',
+                username: randomUser,
+                text: sampleMessages[Math.floor(Math.random() * sampleMessages.length)],
+                timestamp: getCurrentTime()
+            });
+            
+            renderMessages();
+            updateMembersList();
+        }
+
+        // Simulate incoming messages every 15-30 seconds
+        setInterval(() => {
+            if (currentUser && Math.random() > 0.5) {
+                simulateIncomingMessage();
+            }
+        }, Math.random() * 15000 + 15000);
+    </script>
+</body>
+</html>
